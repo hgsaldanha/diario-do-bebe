@@ -1,53 +1,91 @@
 import { Button } from "@chakra-ui/button";
-import { FormErrorMessage } from "@chakra-ui/form-control";
-import { FormLabel } from "@chakra-ui/form-control";
-import { FormControl } from "@chakra-ui/form-control";
-import { Input } from "@chakra-ui/input";
 import { Heading } from "@chakra-ui/layout";
+import { Box } from "@chakra-ui/layout";
+import { HStack } from "@chakra-ui/layout";
 import { SimpleGrid } from "@chakra-ui/layout";
 import { Container } from "@chakra-ui/layout";
-import { Select } from "@chakra-ui/select";
+import { useRadioGroup } from "@chakra-ui/radio";
+import { useRadio } from "@chakra-ui/radio";
 import { Field, Form, Formik } from "formik";
-import Head from "next/head";
-import styles from "../styles/Home.module.css";
+import { Basic } from "../components/basic";
+
+function RadioCard(props) {
+  const { getInputProps, getCheckboxProps } = useRadio(props);
+
+  const input = getInputProps();
+  const checkbox = getCheckboxProps();
+
+  return (
+    <Box as="label">
+      <input {...input} />
+      <Box
+        {...checkbox}
+        cursor="pointer"
+        borderWidth="1px"
+        borderRadius="md"
+        boxShadow="md"
+        _checked={{
+          bg: "teal.600",
+          color: "white",
+          borderColor: "teal.600",
+        }}
+        _focus={{
+          boxShadow: "outline",
+        }}
+        px={5}
+        py={3}
+      >
+        {props.children}
+      </Box>
+    </Box>
+  );
+}
+
+function Extras({ options, onChange }) {
+  const { getRootProps, getRadioProps } = useRadioGroup({
+    name: "extras",
+    onChange,
+  });
+
+  const group = getRootProps();
+
+  return (
+    <HStack {...group}>
+      {options.map((value) => {
+        const radio = getRadioProps({ value });
+        return (
+          <RadioCard key={value} {...radio}>
+            {value}
+          </RadioCard>
+        );
+      })}
+    </HStack>
+  );
+}
 
 export default function Home() {
   return (
     <Container>
       <Formik
-        initialValues={{ evento: 1, inicio: "", fim: "" }}
+        initialValues={{ evento: 1, inicio: "", fim: "", extras: "" }}
         onSubmit={(values, actions) => {
-          console.log(actions);
+          console.log(values);
         }}
       >
         {(props) => (
           <Form>
             <SimpleGrid>
-              <Heading as="h1" mb={2}>Novo evento</Heading>
-              <Field component={Select} name="evento">
-                <option value={1}>Amamentação</option>
-                <option value={2}>Sono</option>
-              </Field>
-              <Field name="inicio">
-                {({ field, form }) => (
-                  <FormControl
-                    isInvalid={form.errors.inicio && form.touched.inicio}
-                  >
-                    <FormLabel htmlFor="inicio">Início</FormLabel>
-                    <Input {...field} id="inicio" placeholder="Início" />
-                    <FormErrorMessage>{form.errors.inicio}</FormErrorMessage>
-                  </FormControl>
-                )}
-              </Field>
-              <Field name="fim">
-                {({ field, form }) => (
-                  <FormControl isInvalid={form.errors.fim && form.touched.fim}>
-                    <FormLabel htmlFor="fim">Fim</FormLabel>
-                    <Input {...field} id="fim" placeholder="Fim" />
-                    <FormErrorMessage>{form.errors.fim}</FormErrorMessage>
-                  </FormControl>
-                )}
-              </Field>
+              <Heading as="h2" mb={2}>
+                Amamentação
+              </Heading>
+              <Basic />
+              <Heading as="h3" size="md">
+                Seio
+              </Heading>
+              <Extras
+                options={["Esquerda", "Direita", "Ambos"]}
+                onChange={(value) => props.setFieldValue("extras", value)}
+              />
               <Button type="submit" mt={4} size="lg" colorScheme="blue">
                 Salvar
               </Button>
